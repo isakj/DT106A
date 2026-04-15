@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual AI Lab 1 - Web Boilerplate</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="page">
+        <header class="hero">
+            <h1>Visual AI Lab 1</h1>
+            <p>Browser-based track for Introduction to Visual AI lab 1.</p>
+        </header>
+
+        <section class="controls card">
+            <div class="controls-grid">
+                <div class="control-group">
+                    <button id="start-webcam" type="button">Start Webcam</button>
+                    <button id="stop-source" type="button">Stop Source</button>
+                    <label class="file-label" for="file-input">Upload Image/Video</label>
+                    <input id="file-input" type="file" accept="image/*,video/*">
+                </div>
+            </div>
+
+            <p id="app-message" class="app-message">
+                Loading OpenCV.js. This starter shows one minimal processing path that you will extend during the lab.
+            </p>
+            <p class="student-note">
+                TODO: add controls for multiple modes and one runtime-adjustable parameter.
+            </p>
+        </section>
+
+        <section class="viewer-grid">
+            <article class="card">
+                <h2>Original Frame</h2>
+                <canvas id="original-canvas" width="640" height="480"></canvas>
+            </article>
+
+            <article class="card">
+                <h2>Processed Frame</h2>
+                <canvas id="processed-canvas" width="640" height="480"></canvas>
+            </article>
+        </section>
+
+        <section class="card">
+            <h2>Current Pipeline</h2>
+            <ul class="status-list">
+                <li><strong>Source:</strong> <span id="source-value">none</span></li>
+                <li><strong>Mode:</strong> <span id="mode-value">grayscale_demo</span></li>
+                <li><strong>Note:</strong> <span id="note-value">Waiting for OpenCV.js to load.</span></li>
+            </ul>
+        </section>
+
+        <video id="video-element" playsinline muted hidden></video>
+    </main>
+
+    <script src="src/settings.js"></script>
+    <script src="src/utils.js"></script>
+    <script src="src/ui.js"></script>
+    <script src="src/camera.js"></script>
+    <script src="src/pipeline_classical.js"></script>
+    <script src="src/main.js"></script>
+    <script async src="https://docs.opencv.org/4.x/opencv.js"></script>
+</body>
+</html>

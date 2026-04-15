@@ -1,0 +1,106 @@
+html {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #1a1f24;
+}
+
+body {
+    margin: 0;
+}
+
+.page {
+    max-width: 1360px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.hero {
+    margin-bottom: 20px;
+}
+
+.hero h1 {
+    margin: 0 0 8px;
+}
+
+.hero p {
+    margin: 0;
+    color: #46515c;
+}
+
+.card {
+    background: #ffffff;
+    border: 1px solid #d8dee4;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+button,
+.file-label {
+    font: inherit;
+}
+
+button,
+.file-label {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #c4ccd4;
+    background: #ffffff;
+}
+
+button,
+.file-label {
+    cursor: pointer;
+}
+
+button:hover,
+.file-label:hover {
+    background: #eef4ff;
+}
+
+#file-input {
+    display: none;
+}
+
+.app-message,
+.student-note {
+    margin-bottom: 0;
+    color: #46515c;
+}
+
+.viewer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+canvas {
+    width: 100%;
+    max-width: 640px;
+    height: auto;
+    background: #0b0f14;
+    border-radius: 8px;
+}
+
+.status-list {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.status-list li {
+    margin-bottom: 8px;
+}

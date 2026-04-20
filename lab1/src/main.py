@@ -15,7 +15,19 @@ import cv2
 from camera import FrameSource
 from pipeline_classical import process_frame
 from settings import APP_TITLE, DEFAULT_PATH, DEFAULT_SOURCE
-from ui import draw_status_overlay
+from ui import draw_status_overlay, make_button_mouse_callback
+
+
+def _side_by_side(input_bgr, processed_bgr):
+    """Stack input (left) and processed (right); resize processed if shapes differ."""
+    left = input_bgr.copy()
+    right = processed_bgr.copy()
+    th, tw = left.shape[:2]
+    if right.shape[:2] != (th, tw):
+        right = cv2.resize(right, (tw, th), interpolation=cv2.INTER_AREA)
+    cv2.putText(left, "Input", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+    cv2.putText(right, "Processed", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+    return cv2.hconcat([left, right])
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,14 +65,33 @@ def main() -> int:
         print(f"[error] {exc}")
         return 1
 
+    ui_state: dict = {"w": 0, "h": 0, "view_mode": 0, "blur_mode": 0, "edge_mode": 0, "det_mode": 0}
+    blur_state: dict = {}
+    det_state: dict = {}
+    cv2.namedWindow(APP_TITLE, cv2.WINDOW_AUTOSIZE)
+    cv2.setMouseCallback(APP_TITLE, make_button_mouse_callback(ui_state))
+
     while True:
         ok, frame = source.read()
         if not ok or frame is None:
             print("[info] No more frames available. Exiting.")
             break
 
-        processed_frame, status = process_frame(frame)
-        annotated_frame = draw_status_overlay(processed_frame, status)
+        frame = cv2.flip(frame, 1)
+
+        processed_frame = process_frame(
+            frame,
+            ui_state["view_mode"],
+            ui_state["blur_mode"],
+            blur_state,
+            ui_state["edge_mode"],
+            ui_state["det_mode"],
+            det_state,
+        )
+        combined = _side_by_side(frame, processed_frame)
+        ui_state["w"] = int(combined.shape[1])
+        ui_state["h"] = int(combined.shape[0])
+        annotated_frame = draw_status_overlay(combined)
 
         cv2.imshow(APP_TITLE, annotated_frame)
         key = cv2.waitKey(1 if source.is_streaming else 0) & 0xFF

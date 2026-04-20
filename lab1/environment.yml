@@ -3,6 +3,10 @@ channels:
   - conda-forge
 dependencies:
   - python=3.11
-  - numpy
-  - opencv
+  - numpy=1.26.4
+  - opencv=4.13.0
   - pip
+  - pip:
+    - torch==2.3.1
+    - torchvision==0.18.1
+    - ultralytics==8.4.37

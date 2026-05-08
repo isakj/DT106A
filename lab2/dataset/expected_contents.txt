@@ -1,0 +1,13 @@
+Suggested shared assets for instructors:
+
+- Collect the dataset using webcam, possibly
+    - Take snap of hand signals, such as thumb up or thumb down, or any type of gestures to recognize action to turn ON or OFF some equipement
+    - Finger Count (1-5 fingers), to control multiple equipement, along with thumb up and thumb down
+- Annotate them using Roboflow
+    - Learn Manual/Traditional Annotation Tools
+- Export in txt (YoloV8) as zip file
+    - Understand the YAML file and variable attributes
+- Place them in the dataset folders
+	- images: Model inputs (.jpg format), containing RGB images
+	- labels: Model outputs (.txt format), containing label and bounding box
+- Run the split_dataset.py to prepare the train, valid and test sets

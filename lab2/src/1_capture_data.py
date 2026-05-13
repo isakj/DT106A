@@ -3,12 +3,31 @@ import os
 from datetime import datetime
 from settings import CWDIR
 
+
+def list_cameras(last_index=9):
+    print("[INFO] cameras (index):")
+    found = False
+    for i in range(last_index + 1):
+        cap = cv2.VideoCapture(i)
+        if not cap.isOpened():
+            cap.release()
+            continue
+        ret, _ = cap.read()
+        cap.release()
+        if not ret:
+            continue
+        found = True
+        print(f"  {i}")
+    if not found:
+        print("  (none)")
+
+
 class DataCollector:
     def __init__(self, save_dir=os.path.join(CWDIR, "../../dataset/org_data"), camera_index=0):
         self.save_dir = save_dir
         os.makedirs(self.save_dir, exist_ok=True)
 
-        self.camera_index = camera_index
+        self.camera_index = 1
         self.cap = None
         self.image_count = 0
 
@@ -18,7 +37,8 @@ class DataCollector:
 
         if not self.cap.isOpened():
             raise RuntimeError(
-                f"Could not open camera (index={self.camera_index}). Try index 1."
+                f"Could not open camera (index={self.camera_index}). "
+                "Run again and pick an index from the camera list, or pass camera_index=..."
             )
 
         print("[INFO] Camera opened successfully")
@@ -28,14 +48,13 @@ class DataCollector:
         return f"img_{timestamp}.jpg"
 
     def save_frame(self, frame):
-
-        """Complete this function to save the current frame to the specified directory with a unique filename. You can use the generate_filename method to create a unique name for each image.
-        TODO:
-        - Generate a unique filename for the image using the generate_filename method.
-        - Save the image to the save_dir using cv2.imwrite.
-        - Increment the image_count and print a message indicating the image has been saved along with the total count of saved images.
-        """
-        return
+        name = self.generate_filename()
+        path = os.path.join(self.save_dir, name)
+        if not cv2.imwrite(path, frame):
+            print(f"[ERROR] imwrite failed: {path}")
+            return
+        self.image_count += 1
+        print(f"[INFO] saved {name} (total {self.image_count})")
 
     def draw_overlay(self, frame):
         text1 = "Press 's' to save | 'q' to quit"
@@ -101,5 +120,6 @@ class DataCollector:
 
 
 if __name__ == "__main__":
+    #list_cameras()
     collector = DataCollector()
     collector.run()

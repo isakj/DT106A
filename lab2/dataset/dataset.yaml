@@ -1,0 +1,11 @@
+# ``path`` is relative to this file; 3_train.py rewrites it to an absolute path for Ultralytics.
+path: .
+train: train/images
+val: valid/images
+test: test/images
+
+nc: 3
+names:
+  0: class0
+  1: class1
+  2: class2

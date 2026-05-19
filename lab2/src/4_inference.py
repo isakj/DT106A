@@ -67,6 +67,12 @@ class LivePredictor:
 
             cls_id = int(box.cls[0])
             label = self.model.names[cls_id]
+            if label == "class0":
+                label = "French press"
+            elif label == "class1":
+                label = "Headphones"
+            elif label == "class2":
+                label = "Toothpaste tube"
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             step = _conf_step(conf, self.conf_threshold)
             _draw_conf_rect(frame, x1, y1, x2, y2, step)

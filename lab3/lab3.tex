@@ -1,0 +1,132 @@
+\documentclass[aspectratio=169]{beamer}
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\usepackage{graphicx}
+
+% Paste Stage 3 numbers and plots from your Colab notebook below.
+\newcommand{\StageThreeModel}{YOLOv8m}
+\newcommand{\StageThreeEpochs}{30}
+\newcommand{\StageThreeMap}{0.00}        % validation mAP@0.5
+\newcommand{\StageThreeMapNinetyFive}{0.00}
+
+\title{Lab 3: Cloud Training and Edge Deployment}
+\subtitle{Baseline Nano, augmentation experiment, rock--paper--scissors demo}
+\author{\texorpdfstring{Isak Jonsson \\ DT106A}{Isak Jonsson, DT106A}}
+\date{\today}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ------------------------------------------------------------------ slide 1
+\begin{frame}[shrink=5]{Setup and baseline}
+  \textbf{Cloud setup}
+  \begin{itemize}
+    \item Dataset and training ran in \textbf{Google Colab} (GPU runtime) with the course notebook.
+    \item Rock--paper--scissors gestures: three classes (\texttt{class0} rock, \texttt{class1} paper, \texttt{class2} scissors), YOLO labels, $\sim$30 webcam images per class, split $0.7/0.1/0.2$.
+    \item \textbf{Baseline (Stage 2):} \textbf{YOLOv8n}, 30 epochs, image size 640, batch 16, default Ultralytics augmentations (no custom heavy policy).
+  \end{itemize}
+  \textbf{Baseline metrics} (validation, final epoch, \texttt{baseline\_nano-3})
+  \begin{itemize}
+    \item \textbf{mAP@0.5: 0.98} \quad mAP@0.5:0.95: 0.81 \quad precision: 0.92 \quad recall: 0.97
+    \item Training and validation losses decrease steadily; mAP curves rise and flatten without a large train/val gap.
+  \end{itemize}
+  \begin{center}
+    \includegraphics[width=0.88\linewidth,height=0.32\textheight,keepaspectratio]{model/baseline_nano-3/results.png}
+  \end{center}
+\end{frame}
+
+% ------------------------------------------------------------------ slide 2
+\begin{frame}[shrink=8]{The optimization experiment (Stage 3)}
+  \textbf{Goal:} beat the Nano baseline with a \textbf{larger model} and \textbf{stronger augmentations}.
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \textbf{Parameters used}
+      \begin{itemize}
+        \item Model: \textbf{\StageThreeModel} (vs.\ Nano in baseline)
+        \item Epochs: \StageThreeEpochs
+        \item Heavy aug examples from the notebook:
+        \begin{itemize}
+          \item Vertical flip (\texttt{flipud}) --- upside-down hands
+          \item Large rotation (\texttt{degrees})
+          \item Mosaic / mixup-style composition
+          \item Strong color jitter
+        \end{itemize}
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \IfFileExists{model/stage3-heavy/results.png}{%
+        \includegraphics[width=\linewidth]{model/stage3-heavy/results.png}%
+      }{%
+        \centering\small
+        Export Stage~3 \texttt{results.png} from Colab to\\
+        \texttt{model/stage3-heavy/results.png}.
+      }
+    \end{column}
+  \end{columns}
+  \vspace{0.25em}
+  \textbf{Stage 3 result (fill from Colab):} mAP@0.5 = \textbf{\StageThreeMap}, mAP@0.5:0.95 = \textbf{\StageThreeMapNinetyFive}.
+\end{frame}
+
+% ------------------------------------------------------------------ slide 3
+\begin{frame}{Analysis of overfitting and data context}
+  \textbf{Baseline (Nano)}
+  \begin{itemize}
+    \item Small model + modest data $\rightarrow$ learns gesture cues quickly; validation mAP@0.5 $\approx$ \textbf{0.98}.
+    \item Loss curves and mAP curves in Colab align: enough \textbf{learning time} without obvious overfitting on this set.
+  \end{itemize}
+  \textbf{Stage 3 (larger model + heavy aug)}
+  \begin{itemize}
+    \item Validation mAP@0.5 \textbf{dropped} to \textbf{\StageThreeMap} vs.\ 0.98 baseline --- more capacity did not help.
+    \item \textbf{Why metrics worsened:} augmentations broke \textbf{data context}. Flipping hands upside down or extreme rotation creates poses never labeled in the dataset; the model wastes capacity fitting synthetic views instead of real webcam gestures.
+    \item Larger YOLO needs more diverse \emph{real} data or \emph{gentle} aug (brightness, slight rotation), not extreme inversions.
+  \end{itemize}
+  \textbf{Lesson:} match \textbf{model complexity} and \textbf{augmentation strength} to dataset size and how objects actually appear at inference.
+\end{frame}
+
+% ------------------------------------------------------------------ slide 4
+\begin{frame}{Cloud-to-edge demonstration}
+  \textbf{Cloud $\rightarrow$ local}
+  \begin{itemize}
+    \item Downloaded \texttt{best.pt} from Colab into \texttt{model/baseline\_nano-3/weights/}.
+    \item Local \texttt{lab3/src/4\_inference.py}: live webcam, YOLO boxes, rock--paper--scissors game UI (countdown, 400\,ms gesture sample, robot panel).
+  \end{itemize}
+  \begin{columns}[T,onlytextwidth]
+    \begin{column}{0.55\textwidth}
+      \IfFileExists{inference_edge.png}{%
+        \includegraphics[width=\linewidth]{inference_edge.png}%
+      }{%
+        \includegraphics[width=\linewidth]{success.png}%
+      }
+    \end{column}
+    \begin{column}{0.42\textwidth}
+      \small
+      Same weights trained in the cloud run on the PC. Threshold tuning (\texttt{+}/\texttt{-}) still matters for stable round sampling.
+      \vspace{0.5em}
+
+      Optional: validation preview from training ---\\
+      \includegraphics[width=\linewidth]{model/baseline_nano-3/val_batch0_pred.jpg}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% ------------------------------------------------------------------ slide 5
+\begin{frame}{Key takeaways}
+  \begin{itemize}
+    \item \textbf{Cloud resources} make iteration fast (GPU, long training, saved plots in the notebook). Edge deployment proves the artifact is usable outside Colab.
+    \item \textbf{Baseline Nano} reached \textbf{mAP@0.5 $\approx$ 0.98} on this small gesture set --- a simple model matched the problem size.
+    \item \textbf{Over-engineering trap:} a bigger model plus aggressive augmentation \textbf{hurt} metrics; context-aware aug beats ``more aug.''
+    \item \textbf{Deployment:} training metrics are not enough --- live timing, threshold, and stable class presence (150\,ms / 400\,ms rules) decide game behavior.
+  \end{itemize}
+  \vspace{0.35em}
+  \textbf{Optional extensions}
+  \begin{itemize}
+    \item \texttt{tune()} hyperparameter search (notebook Step~6)
+    \item Custom mild augmentation policy that improves over baseline
+  \end{itemize}
+\end{frame}
+
+\end{document}
